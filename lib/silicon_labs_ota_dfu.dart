@@ -82,7 +82,7 @@ class SiliconLabsOtaPackage implements OtaPackage {
 
     if (shouldReboot(characteristics)) {
       try {
-        _rebootToDfuMode(
+        await _rebootToDfuMode(
             device, characteristics.controlCharacteristic!, bleRepo);
       } catch (e) {
         debugPrint(e.toString());
