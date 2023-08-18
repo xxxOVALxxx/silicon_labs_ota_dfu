@@ -8,9 +8,10 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  collection: ^1.17.1
   flutter:
     sdk: flutter
-  flutter_blue_plus: ^1.14.7
+  flutter_blue_plus: ^1.14.11
 
 dev_dependencies:
   flutter_test:
