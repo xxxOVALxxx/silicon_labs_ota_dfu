@@ -1,4 +1,4 @@
-##Silicon Labs OTA DFU
+## Silicon Labs OTA DFU
 A Flutter package for performing Over-the-Air (OTA) Device Firmware Update (DFU) for Silicon Labs devices using Bluetooth Low Energy (BLE).
 
 Features
