@@ -11,7 +11,6 @@ abstract class FirmwareSource {
 }
 
 // Concrete firmware sources
-
 class FileFirmwareSource extends FirmwareSource {
   final String filePath;
 
@@ -19,7 +18,7 @@ class FileFirmwareSource extends FirmwareSource {
 
   @override
   Future<List<Uint8List>> getFirmwareChunks(int mtuSize) async {
-    // read file and split into chunks
+    // Read file and split into chunks
     final fileBytes = await File(filePath).readAsBytes();
 
     return splitIntoChunks(fileBytes, mtuSize);

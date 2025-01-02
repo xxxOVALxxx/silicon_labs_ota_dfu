@@ -17,7 +17,7 @@ OtaCharacteristics findCharacteristics(List<BluetoothService> services) {
       .firstWhereOrNull((s) => s.serviceUuid == SiliconLabsConsts.dfuService);
 
   if (dfuService == null) {
-    throw Exception("No OTA DFU service");
+    throw Exception("OTA DFU service missing");
   }
 
   final controlCharacteristic = dfuService.characteristics.firstWhereOrNull(

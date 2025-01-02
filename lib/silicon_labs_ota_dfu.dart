@@ -1,23 +1,3 @@
-/*
-TODO: 
-Add custom exceptions
-*/
-
-/*
-TODO: 
-Replace "magic numbers" with constants
-*/
-
-/*
-TODO: 
-Write tests
-*/
-
-/*
-TODO: 
-Create README
-*/
-
 library silicon_labs_ota_dfu;
 
 export 'other.dart';
@@ -38,7 +18,6 @@ abstract class OtaPackage {
   );
 
   // Stream to provide progress percentage
-  //TODO: Replace with callback or state object
   Stream<int> get percentageStream;
 }
 
@@ -74,9 +53,6 @@ class SiliconLabsOtaPackage implements OtaPackage {
   ) async {
     final bleRepo = BleRepository();
     final services = device.servicesList;
-    if (services == null) {
-      throw Exception('OTA DFU service not found');
-    }
 
     OtaCharacteristics characteristics = findCharacteristics(services);
 
