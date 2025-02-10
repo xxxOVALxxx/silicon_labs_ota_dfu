@@ -22,17 +22,17 @@ abstract class OtaPackage {
 }
 
 class BleRepository {
-  Future<void> writeDataCharacteristic(
+  static Future<void> writeDataCharacteristic(
       BluetoothCharacteristic characteristic, Uint8List data) async {
     await characteristic.write(data, withoutResponse: false);
   }
 
-  Future<List<int>> readCharacteristic(
+  static Future<List<int>> readCharacteristic(
       BluetoothCharacteristic characteristic) async {
     return await characteristic.read();
   }
 
-  Future<int> requestMtu(BluetoothDevice device, int mtuSize) async {
+  static Future<int> requestMtu(BluetoothDevice device, int mtuSize) async {
     return await device.requestMtu(mtuSize);
   }
 }
@@ -51,21 +51,19 @@ class SiliconLabsOtaPackage implements OtaPackage {
     BluetoothDevice device,
     FirmwareSource source,
   ) async {
-    final bleRepo = BleRepository();
     final services = device.servicesList;
 
     OtaCharacteristics characteristics = findCharacteristics(services);
 
     if (shouldReboot(characteristics)) {
       try {
-        await _rebootToDfuMode(
-            device, characteristics.controlCharacteristic!, bleRepo);
+        await _rebootToDfuMode(device, characteristics.controlCharacteristic!);
       } catch (e) {
         debugPrint(e.toString());
         throw Exception('Error rebooting to DFU mode');
       }
 
-      final discoveredServices = await device.discoverServices();
+      final discoveredServices = await device.discoverServices(subscribeToServicesChanged: false);
       characteristics = findCharacteristics(discoveredServices);
       if (characteristics.controlCharacteristic == null ||
           characteristics.dataCharacteristic == null) {
@@ -79,13 +77,13 @@ class SiliconLabsOtaPackage implements OtaPackage {
         characteristics.dataCharacteristic!;
 
     // Get MTU size from the device
-    int mtuSize = await bleRepo.requestMtu(device, 250) - 3;
+    int mtuSize = await BleRepository.requestMtu(device, 250) - 3;
 
     // Fetch chunks from firmware source
     List<Uint8List> binaryChunks = await source.getFirmwareChunks(mtuSize);
 
     // Write x00 to the controlCharacteristic
-    await bleRepo.writeDataCharacteristic(
+    await BleRepository.writeDataCharacteristic(
         controlCharacteristic, Uint8List.fromList([0]));
 
     int packageNumber = 0;
@@ -94,7 +92,7 @@ class SiliconLabsOtaPackage implements OtaPackage {
       debugPrint(
           'Writing package number $packageNumber of ${binaryChunks.length}. Packet length ${chunk.length} bytes');
 
-      await bleRepo.writeDataCharacteristic(dataCharacteristic, chunk);
+      await BleRepository.writeDataCharacteristic(dataCharacteristic, chunk);
       packageNumber++;
 
       double progress = (packageNumber / binaryChunks.length) * 100;
@@ -105,17 +103,17 @@ class SiliconLabsOtaPackage implements OtaPackage {
     }
 
     // Write x03 to the controlCharacteristic to finish the update process
-    await bleRepo.writeDataCharacteristic(
+    await BleRepository.writeDataCharacteristic(
         controlCharacteristic, Uint8List.fromList([3]));
 
     device.disconnect();
   }
 
   Future<void> _rebootToDfuMode(
-      BluetoothDevice device,
-      BluetoothCharacteristic controlCharacteristic,
-      BleRepository bleRepo) async {
-    await bleRepo.writeDataCharacteristic(
+    BluetoothDevice device,
+    BluetoothCharacteristic controlCharacteristic,
+  ) async {
+    await BleRepository.writeDataCharacteristic(
         controlCharacteristic, Uint8List.fromList([0]));
     await device.disconnect();
     await Future.delayed(const Duration(seconds: 5));
